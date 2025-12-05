@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glad\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glm-0.9.9.7\glm\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glad\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glm-0.9.9.7\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,7 +121,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glad\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glm-0.9.9.7\glm\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glad\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glm-0.9.9.7\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,17 +134,30 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\biblioteki\glad\src\glad.c" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="src\Core\Game.cpp" />
+    <ClCompile Include="src\Core\Main.cpp" />
+    <ClCompile Include="src\Core\ResourceManager.cpp" />
+    <ClCompile Include="src\Entities\GameObject.cpp" />
+    <ClCompile Include="src\Entities\Player.cpp" />
+    <ClCompile Include="src\Graphics\Shader.cpp" />
+    <ClCompile Include="src\Graphics\Texture2D.cpp" />
+    <ClCompile Include="Vendors\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="default.frag" />
-    <None Include="default.vert" />
+    <ClInclude Include="src\Core\Game.h" />
+    <ClInclude Include="src\Core\ResourceManager.h" />
+    <ClInclude Include="src\Entities\GameObject.h" />
+    <ClInclude Include="src\Entities\Player.h" />
+    <ClInclude Include="src\Graphics\Shader.h" />
+    <ClInclude Include="src\Graphics\Texture2D.h" />
+    <ClInclude Include="Vendors\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="Shader.h" />
+    <None Include="Assets\Shaders\default.frag" />
+    <None Include="Assets\Shaders\default.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Textures\face.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,10 +1,14 @@
 #include "Player.h"
+#include "../Core/ResourceManager.h"
 
 Player::Player()
 {
-    this->PosX = 0.0f;
-    this->PosY = 0.0f;
-    this->Speed = 1.0f;
+    this->Position = glm::vec2(0.0f, 0.0f);
+    this->Size = glm::vec2(1.0f, 1.0f);
+    this->Color = glm::vec3(1.0f, 1.0f, 1.0f);
+    this->MoveSpeed = 5.0f;
+    this->Sprite = ResourceManager::GetTexture("face");
+
     initRenderData(); 
 }
 
@@ -15,39 +19,41 @@ Player::~Player()
     glDeleteBuffers(1, &EBO);
 }
 
+
 void Player::Update(GLFWwindow* window, float dt)
 {
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        PosX -= Speed * dt;
+        Position.x -= MoveSpeed * dt;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        PosX += Speed * dt;
+        Position.x += MoveSpeed * dt;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        PosY += Speed * dt;
+        Position.y += MoveSpeed * dt;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        PosY -= Speed * dt;
+        Position.y -= MoveSpeed * dt;
 }
 
 void Player::Draw(Shader& shader)
 {
     shader.Use();
 
-    int moveLoc = glGetUniformLocation(shader.ID, "uMove");
-    glUniform2f(moveLoc, PosX, PosY);
+    glUniform2f(10, this->Position.x, this->Position.y);
+    glUniform3f(11, this->Color.x, this->Color.y, this->Color.z);
+
+    this->Sprite.Bind();
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0); 
+    glBindVertexArray(0);
 }
 
 void Player::initRenderData()
 {
     float vertices[] = {
-         0.5f, 0.5f, 0.0f,  // Prawy górny
-         0.5f, -0.5f, 0.0f,  // Prawy dolny
-        -0.5f, -0.5f, 0.0f,  // Lewy dolny
-        -0.5f,  0.5f, 0.0f   // Lewy górny
+         0.5f,  0.5f, 0.0f,   1.0f, 1.0f,
+          0.5f, -0.5f, 0.0f,   1.0f, 0.0f,
+          -0.5f, -0.5f, 0.0f,   0.0f, 0.0f,
+          -0.5f,  0.5f, 0.0f,   0.0f, 1.0f
     };
-
     unsigned int indices[] = {
         0, 1, 3,
         1, 2, 3
@@ -65,9 +71,12 @@ void Player::initRenderData()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
