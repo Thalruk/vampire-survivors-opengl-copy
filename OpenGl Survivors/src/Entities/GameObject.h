@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 #include "../Graphics/Shader.h"
-
+class SpriteRenderer;
 class GameObject
 {
 public:
@@ -21,5 +21,5 @@ public:
     virtual ~GameObject();
 
     virtual void Update(GLFWwindow* window, float dt) = 0;
-    virtual void Draw(Shader& shader) = 0;
+    virtual void Draw(SpriteRenderer& renderer) = 0;
 };

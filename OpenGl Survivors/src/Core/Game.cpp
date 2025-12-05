@@ -44,8 +44,10 @@ bool Game::Init()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return false;
 	}
+	ResourceManager::LoadTexture("Assets/Textures/face.png", true, "face");
 
 	this->MainShader = new Shader("assets/shaders/default.vert", "assets/shaders/default.frag");
+	this->Renderer = new SpriteRenderer(*MainShader);
 	this->MainPlayer = new Player();
 
 
@@ -57,7 +59,6 @@ bool Game::Init()
 	MainShader->Use();
 	glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(projection));
 
-	ResourceManager::LoadTexture("Assets/Textures/face.png", true, "face");
 	return true;
 }
 
@@ -101,7 +102,7 @@ void Game::Render()
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	if (MainPlayer != nullptr && MainShader != nullptr) {
-		MainPlayer->Draw(*MainShader);
+		MainPlayer->Draw(*Renderer);
 	}
 }
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);

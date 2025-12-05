@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "../Graphics/Shader.h"
+#include "../Graphics/SpriteRenderer.h"
 #include "../Entities/Player.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -23,7 +24,7 @@ private:
     int Width, Height;
     const char* Title;
     GLFWwindow* Window;
-
+    SpriteRenderer* Renderer;
     Shader* MainShader;
     Player* MainPlayer;
 

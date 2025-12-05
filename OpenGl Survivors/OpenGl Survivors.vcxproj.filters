@@ -66,6 +66,9 @@
     <ClCompile Include="src\Core\ResourceManager.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Graphics\SpriteRenderer.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Core\Game.h">
@@ -88,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="Vendors\stb_image.h">
       <Filter>Vendors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\SpriteRenderer.h">
+      <Filter>src\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

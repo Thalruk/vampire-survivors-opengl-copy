@@ -14,9 +14,5 @@ public:
 
     void Update(GLFWwindow* window, float dt) override;
 
-    void Draw(Shader& shader) override;
-
-private:
-    unsigned int VAO, VBO, EBO;
-    void initRenderData(); 
+    void Draw(SpriteRenderer& renderer) override;
 };
