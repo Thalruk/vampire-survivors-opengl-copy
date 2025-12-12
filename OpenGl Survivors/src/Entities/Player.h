@@ -11,7 +11,7 @@ public:
     Player();
 
     ~Player();
-
+    int HP;
     void Update(GLFWwindow* window, float dt) override;
 
     void Draw(SpriteRenderer& renderer) override;

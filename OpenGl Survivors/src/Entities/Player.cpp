@@ -7,8 +7,9 @@ Player::Player()
     this->Position = glm::vec2(0.0f, 0.0f);
     this->Size = glm::vec2(1.0f, 1.0f);
     this->Color = glm::vec3(1.0f, 1.0f, 1.0f);
-    this->MoveSpeed = 5.0f;
+    this->MoveSpeed = 3.0f;
     this->Sprite = ResourceManager::GetTexture("face");
+    this->HP = 5;
 }
 
 Player::~Player()

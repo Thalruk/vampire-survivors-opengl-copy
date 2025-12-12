@@ -104,12 +104,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glad\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glm-0.9.9.7\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glad\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glm-0.9.9.7\glm;D:\VampirkiOpenGL\biblioteki\glad\include;D:\VampirkiOpenGL\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\include;D:\VampirkiOpenGL\biblioteki\glm-0.9.9.7\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\lib-vc2022;D:\VampirkiOpenGL\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -121,14 +121,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glad\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glm-0.9.9.7\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glad\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\include;C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glm-0.9.9.7\glm;D:\VampirkiOpenGL\biblioteki\glad\include;D:\VampirkiOpenGL\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\include;D:\VampirkiOpenGL\biblioteki\glm-0.9.9.7\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\barte\Pulpit\Studia\magisterka\semestr 3\Zaawansowane programowanie gier\vampire-survivors-opengl-copy\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\lib-vc2022;D:\VampirkiOpenGL\biblioteki\glfw-3.4.bin.WIN64\glfw-3.4.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -137,6 +137,7 @@
     <ClCompile Include="src\Core\Game.cpp" />
     <ClCompile Include="src\Core\Main.cpp" />
     <ClCompile Include="src\Core\ResourceManager.cpp" />
+    <ClCompile Include="src\Entities\Enemy.cpp" />
     <ClCompile Include="src\Entities\GameObject.cpp" />
     <ClCompile Include="src\Entities\Player.cpp" />
     <ClCompile Include="src\Graphics\Shader.cpp" />
@@ -145,8 +146,11 @@
     <ClCompile Include="Vendors\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\Core\Game.h" />
     <ClInclude Include="src\Core\ResourceManager.h" />
+    <ClInclude Include="src\Entities\Enemy.h" />
+    <ClInclude Include="src\entities\ExpOrb.h" />
     <ClInclude Include="src\Entities\GameObject.h" />
     <ClInclude Include="src\Entities\Player.h" />
     <ClInclude Include="src\Graphics\Shader.h" />
@@ -160,6 +164,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Textures\face.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="OpenGl Survivors.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
