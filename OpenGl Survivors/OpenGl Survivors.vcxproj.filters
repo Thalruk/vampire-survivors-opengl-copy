@@ -72,6 +72,12 @@
     <ClCompile Include="src\Entities\Enemy.cpp">
       <Filter>src\Entities</Filter>
     </ClCompile>
+    <ClCompile Include="src\Entities\Projectile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Entities\Pickup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Core\Game.h">
@@ -106,6 +112,12 @@
     </ClInclude>
     <ClInclude Include="src\entities\ExpOrb.h">
       <Filter>src\Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Entities\Projectile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Entities\Pickup.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

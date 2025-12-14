@@ -4,8 +4,28 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "ResourceManager.h"
 #include "../Entities/Enemy.h"
+#include "../Entities/Pickup.h"
 #include <ctime> 
 #include <iostream>
+#include <algorithm>
+#include <cfloat> //FLT_MAX
+#include <cmath>
+
+static bool CheckAABB_Center(const glm::vec2& aPos, const glm::vec2& aSize, 
+							 const glm::vec2& bPos, const glm::vec2& bSize)
+{
+	glm::vec2 aHalf = aSize * 0.5f;
+	glm::vec2 bHalf = bSize * 0.5f;
+
+	glm::vec2 aMin = aPos - aHalf;
+	glm::vec2 aMax = aPos + aHalf;
+	glm::vec2 bMin = bPos - bHalf;
+	glm::vec2 bMax = bPos + bHalf;
+
+	bool overlapX = aMin.x <= bMax.x && aMax.x >= bMin.x;
+	bool overlapY = aMin.y <= bMax.y && aMax.y >= bMin.y;
+	return overlapX && overlapY;
+}
 
 Game::Game(int width, int height, const char* title)
 {
@@ -26,9 +46,13 @@ Game::Game(int width, int height, const char* title)
 
 Game::~Game()
 {
+	delete Renderer;
+	Renderer = nullptr;
 	delete(MainShader);
 	delete(MainPlayer);
-	glfwTerminate();
+
+	for (Projectile* p : Projectiles) delete p;
+	Projectiles.clear();
 
 	// Sprz¹tanie wrogów
 	for (Enemy* enemy : Enemies)
@@ -36,6 +60,14 @@ Game::~Game()
 		delete enemy;
 	}
 	Enemies.clear();
+
+	for (Pickup* pu : Pickups) delete pu;
+	Pickups.clear();
+
+	if (Window) glfwDestroyWindow(Window);
+	Window = nullptr;
+	glfwTerminate();
+
 }
 
 bool Game::Init()
@@ -44,15 +76,18 @@ bool Game::Init()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
+	glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+		
 	this->Window = glfwCreateWindow(Width, Height, Title, NULL, NULL);
-	if (Window == NULL)
+
+	if (!this->Window)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return false;
 	}
 
+	glfwMaximizeWindow(this->Window);
 	glfwMakeContextCurrent(Window);
 	glfwSetFramebufferSizeCallback(Window, framebuffer_size_callback);
 
@@ -64,10 +99,25 @@ bool Game::Init()
 		return false;
 	}
 
+	glDisable(GL_DEPTH_TEST); // 2D sprite game
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	int fbW = 0, fbH = 0;
+	glfwGetFramebufferSize(Window, &fbW, &fbH);
+	glViewport(0, 0, fbW, fbH);
+
+	this->Width = fbW;
+	this->Height = fbH;
+
+	framebuffer_size_callback(Window, this->Width, this->Height);
+
 	srand(static_cast<unsigned int>(time(NULL)));
 
 	ResourceManager::LoadTexture("Assets/Textures/face.png", true, "face");
 	ResourceManager::LoadTexture("Assets/Textures/enemy.png", true, "enemy");
+	ResourceManager::LoadTexture("Assets/Textures/bullet.png", true, "bullet");
+	ResourceManager::LoadTexture("Assets/Textures/pickup.png", true, "pickup");
 
 	this->MainShader = new Shader("assets/shaders/default.vert", "assets/shaders/default.frag");
 	this->Renderer = new SpriteRenderer(*MainShader);
@@ -79,13 +129,17 @@ bool Game::Init()
 	this->PlayerHitTimer = 0.0f;
 	this->SpawnTimer = 0.0f;
 
-	float zoom = 10.0f;
-	float aspectRatio = (float)Width / (float)Height;
+	Zoom = 10.0f;
+	float aspect = (float)Width / (float)Height;
 
-	glm::mat4 projection = glm::ortho(-zoom * aspectRatio, zoom * aspectRatio, -zoom, zoom, -1.0f, 1.0f);
+	BaseProjection = glm::ortho(
+		-Zoom * aspect, Zoom * aspect,
+		-Zoom, Zoom,
+		-1.0f, 1.0f
+	);
 
 	MainShader->Use();
-	glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(BaseProjection));
 
 	return true;
 }
@@ -110,7 +164,6 @@ void Game::Run()
 		Render();
 
 		glfwSwapBuffers(Window);
-		glfwPollEvents();
 	}
 }
 
@@ -118,6 +171,17 @@ void Game::ProcessInput(float dt)
 {
 	if (glfwGetKey(Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(Window, true);
+
+	static bool pWasDown = false;
+	bool pDown = glfwGetKey(Window, GLFW_KEY_P) == GLFW_PRESS;
+
+	if (pDown && !pWasDown)
+	{
+		HasMultiShot = true;
+		MultiShotTimeLeft = MultiShotDuration;
+	}
+
+	pWasDown = pDown;
 }
 
 void Game::Update(float dt)
@@ -130,16 +194,106 @@ void Game::Update(float dt)
 		return;
 	}
 
+	if (MainPlayer == nullptr)
+		return;
+
 	// --- 2. AKTUALIZACJA GRACZA I CZASU ---
-	if (MainPlayer != nullptr) MainPlayer->Update(Window, dt);
+	MainPlayer->Update(Window, dt);
+
+	float aspect = (float)Width / (float)Height;
+	float halfW = Zoom * aspect;
+	float halfH = Zoom;
+
+	// margines = po³owa rozmiaru sprite'a, ¿eby nie ucina³o na krawêdzi
+	glm::vec2 halfSize = MainPlayer->Size * 0.5f;
+
+	auto clampf = [](float v, float a, float b) {
+		return (v < a) ? a : (v > b) ? b : v;
+		};
+
+	MainPlayer->Position.x = clampf(MainPlayer->Position.x, -halfW + halfSize.x, halfW - halfSize.x);
+	MainPlayer->Position.y = clampf(MainPlayer->Position.y, -halfH + halfSize.y, halfH - halfSize.y);
 
 	TotalGameTime += dt;
+
+	if (HasMultiShot)
+	{
+		MultiShotTimeLeft -= dt;
+		if (MultiShotTimeLeft <= 0.0f)
+		{
+			HasMultiShot = false;
+			MultiShotTimeLeft = 0.0f;
+			std::cout << "PICKUP: MultiShot OFF\n";
+		}
+	}
 
 	// Timer nietykalnoœci
 	if (PlayerHitTimer > 0.0f)
 	{
 		PlayerHitTimer -= dt;
 		if (PlayerHitTimer < 0.8f) MainPlayer->Color = glm::vec3(1.0f);
+	}
+
+	// --- 2.5 SPAWN POCISKU CO AttackInterval ---
+	AttackTimer -= dt;
+	if (AttackTimer <= 0.0f)
+	{
+
+		Texture2D projTex = ResourceManager::GetTexture("bullet");
+
+		Enemy* nearest = nullptr;
+		float bestD2 = FLT_MAX;
+
+		for (Enemy* e : Enemies)
+		{
+			if (!e) continue;
+			glm::vec2 d = e->Position - MainPlayer->Position;
+			float d2 = d.x * d.x + d.y * d.y;
+			if (d2 < bestD2)
+			{
+				bestD2 = d2;
+				nearest = e;
+			}
+		}
+
+		if (nearest != nullptr)
+		{
+			glm::vec2 dir = nearest->Position - MainPlayer->Position;
+			float len = glm::length(dir);
+			dir = (len > 0.001f) ? (dir / len) : glm::vec2(1.0f, 0.0f);
+
+			int count = HasMultiShot ? PowerShotCount : BaseShotCount;
+			if (count < 1) count = 1;
+
+			float spreadRad = glm::radians(MultiShotSpreadDeg);
+
+			// dla 1 pocisku: offset = 0
+			// dla 3 pocisków: offsety = -1, 0, +1
+			int mid = count / 2;
+
+			for (int i = 0; i < count; i++)
+			{
+				int k = i - mid;
+
+				float angle = k * spreadRad;
+				
+				// obrót wektora dir w 2D o k¹t angle
+				glm::vec2 rotatedDir;
+				rotatedDir.x = dir.x * std::cos(angle) - dir.y * std::sin(angle);
+				rotatedDir.y = dir.x * std::sin(angle) + dir.y * std::cos(angle);
+
+				Projectiles.push_back(new Projectile(
+					MainPlayer->Position,
+					ProjectileSize,
+					rotatedDir * ProjectileSpeed,
+					ProjectileLife,
+					ProjectileDamage,
+					projTex
+				));
+			}
+
+			AttackTimer = AttackInterval; // dopiero po strzale
+		}
 	}
 
 	// --- 3. SYSTEM FAL I SPAWNER (CYKLICZNY) ---
@@ -202,6 +356,52 @@ void Game::Update(float dt)
 			}
 		}
 	}
+	
+	// --- 3.5. SPAWN PICKUPÓW (tylko 1 naraz) ---
+	bool hasActivePickup = std::any_of(Pickups.begin(), Pickups.end(),
+		[](Pickup* p) { return p && !p->Collected; });
+
+	if (!hasActivePickup)
+	{
+		PickupSpawnTimer += dt;
+		if (PickupSpawnTimer >= PickupSpawnInterval)
+		{
+			PickupSpawnTimer = 0.0f;
+
+			glm::vec2 pickupSize(0.8f, 0.8f);
+			glm::vec2 pickupHalf = pickupSize * 0.5f;
+
+			auto randf = [](float a, float b) {
+				return a + (b - a) * (rand() / (float)RAND_MAX);
+				};
+
+			float randomX = randf(-halfW + pickupHalf.x, halfW - pickupHalf.x);
+			float randomY = randf(-halfH + pickupHalf.y, halfH - pickupHalf.y);
+
+			glm::vec2 spawnPos(randomX, randomY);
+
+			if (glm::distance(spawnPos, MainPlayer->Position) < 2.0f)
+			{
+				// nie spawnuj teraz; spróbuj ponownie prawie od razu
+				PickupSpawnTimer = PickupSpawnInterval - 0.1f;
+			}
+			else
+			{
+				Texture2D pickupTex = ResourceManager::GetTexture("pickup");
+				Pickups.push_back(new Pickup(
+					spawnPos,
+					pickupSize,
+					PickupType::MultiShot,
+					pickupTex
+				));
+			}
+		}
+	}
+	else
+	{
+		PickupSpawnTimer = 0.0f;
+	}
+
 
 	// --- 4. RUCH WROGÓW I KOLIZJE MIÊDZY NIMI ---
 	for (Enemy* enemy : Enemies)
@@ -264,6 +464,84 @@ void Game::Update(float dt)
 			}
 		}
 	}
+	for (Projectile* p : Projectiles)
+	{
+		if (!p || p->Destroyed) continue;
+
+		p->Update(Window, dt);
+
+		//kolizja pocisk -> wróg
+		for (Enemy* e : Enemies)
+		{
+			if (!e) continue;
+
+			if (CheckAABB_Center(p->Position, p->Size, e->Position, e->Size))
+			{
+				e->HP -= p->Damage;
+				p->Destroyed = true;	// pocisk znika po trafieniu
+				break;
+			}
+		}
+	}
+
+	Projectiles.erase(
+		std::remove_if(Projectiles.begin(), Projectiles.end(),
+			[](Projectile* p)
+			{
+				if (!p) return true;
+
+				if (p->Destroyed)
+				{
+					delete p;
+					return true;
+				}
+				return false;
+			}),
+		Projectiles.end());
+
+	Enemies.erase(
+		std::remove_if(Enemies.begin(), Enemies.end(),
+			[](Enemy* e)
+			{
+				if (!e) return true;
+
+				if (e->HP <= 0)
+				{
+					delete e;
+					return true;
+				}
+
+				return false;
+			}),
+		Enemies.end());
+
+	for (Pickup* pu : Pickups)
+	{
+		if (!pu || pu->Collected) continue;
+
+		if (CheckAABB_Center(MainPlayer->Position, MainPlayer->Size, pu->Position, pu->Size))
+		{
+			pu->Collected = true;
+
+			//efekt power-up
+			HasMultiShot = true;
+			MultiShotTimeLeft = MultiShotDuration;
+			std::cout << "PICKUP: MultiShot ON (" << MultiShotDuration << "s)\n";
+		}
+	}
+	Pickups.erase(
+		std::remove_if(Pickups.begin(), Pickups.end(),
+			[](Pickup* pu)
+			{
+				if (!pu) return true;
+				if (pu->Collected)
+				{
+					delete pu;
+					return true;
+				}
+				return false;
+			}),
+		Pickups.end());
 }
 
 void Game::Render()
@@ -271,12 +549,24 @@ void Game::Render()
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	if (MainPlayer != nullptr && MainShader != nullptr) MainPlayer->Draw(*Renderer);
-	if (MainShader != nullptr)
-	{
-		for (Enemy* enemy : Enemies) enemy->Draw(*Renderer);
-	}
+	if (!MainShader || !Renderer) return;
+
+	// Sta³a projekcja
+	MainShader->Use();
+	glUniformMatrix4fv(0, 1, GL_FALSE, glm::value_ptr(BaseProjection));
+
+	if (MainPlayer) MainPlayer->Draw(*Renderer);
+
+	for (Projectile* p : Projectiles)
+		if (p && !p->Destroyed) p->Draw(*Renderer);
+
+	for (Pickup* pu : Pickups)
+		if (pu && !pu->Collected) pu->Draw(*Renderer);
+
+	for (Enemy* enemy : Enemies)
+		if (enemy) enemy->Draw(*Renderer);
 }
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
@@ -287,6 +577,13 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void Game::ResetGame()
 {
+	for (Pickup* pu : Pickups) delete pu;
+	Pickups.clear();
+	PickupSpawnTimer = 0.0f;
+
+	for (Projectile* p : Projectiles) delete p;
+	Projectiles.clear();
+
 	for (Enemy* enemy : Enemies) delete enemy;
 	Enemies.clear();
 
