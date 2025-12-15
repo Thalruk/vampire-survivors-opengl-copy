@@ -31,6 +31,5 @@ void Player::Update(GLFWwindow* window, float dt)
 
 void Player::Draw(SpriteRenderer& renderer)
 {
-    // Jedna linijka zamiast 10!
     renderer.DrawSprite(this->Sprite, this->Position, this->Size, this->Rotation, this->Color);
 }

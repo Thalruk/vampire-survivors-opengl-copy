@@ -8,7 +8,7 @@
 #include <ctime> 
 #include <iostream>
 #include <algorithm>
-#include <cfloat> //FLT_MAX
+#include <cfloat> 
 #include <cmath>
 
 static bool CheckAABB_Center(const glm::vec2& aPos, const glm::vec2& aSize, 
@@ -99,7 +99,7 @@ bool Game::Init()
 		return false;
 	}
 
-	glDisable(GL_DEPTH_TEST); // 2D sprite game
+	glDisable(GL_DEPTH_TEST); 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -186,7 +186,6 @@ void Game::ProcessInput(float dt)
 
 void Game::Update(float dt)
 {
-	// --- 1. GAME OVER ---
 	if (IsGameOver)
 	{
 		GameOverTimer += dt;
@@ -197,14 +196,12 @@ void Game::Update(float dt)
 	if (MainPlayer == nullptr)
 		return;
 
-	// --- 2. AKTUALIZACJA GRACZA I CZASU ---
 	MainPlayer->Update(Window, dt);
 
 	float aspect = (float)Width / (float)Height;
 	float halfW = Zoom * aspect;
 	float halfH = Zoom;
 
-	// margines = po³owa rozmiaru sprite'a, ¿eby nie ucina³o na krawêdzi
 	glm::vec2 halfSize = MainPlayer->Size * 0.5f;
 
 	auto clampf = [](float v, float a, float b) {
@@ -227,14 +224,12 @@ void Game::Update(float dt)
 		}
 	}
 
-	// Timer nietykalnoœci
 	if (PlayerHitTimer > 0.0f)
 	{
 		PlayerHitTimer -= dt;
 		if (PlayerHitTimer < 0.8f) MainPlayer->Color = glm::vec3(1.0f);
 	}
 
-	// --- 2.5 SPAWN POCISKU CO AttackInterval ---
 	AttackTimer -= dt;
 	if (AttackTimer <= 0.0f)
 	{
@@ -296,14 +291,11 @@ void Game::Update(float dt)
 		}
 	}
 
-	// --- 3. SYSTEM FAL I SPAWNER (CYKLICZNY) ---
 	float currentInterval = 2.0f;
 	int enemiesToSpawn = 1;
 
-	// Obliczamy sekundê w bie¿¹cej minucie (0-59)
 	int secondsInMinute = (int)TotalGameTime % 60;
 
-	// ZMIANA: Rój w³¹cza siê, gdy sekunda jest miêdzy 50 a 55 (w ka¿dej minucie)
 	bool isSwarmEvent = (secondsInMinute >= 50 && secondsInMinute <= 55);
 
 	if (isSwarmEvent)
@@ -357,7 +349,6 @@ void Game::Update(float dt)
 		}
 	}
 	
-	// --- 3.5. SPAWN PICKUPÓW (tylko 1 naraz) ---
 	bool hasActivePickup = std::any_of(Pickups.begin(), Pickups.end(),
 		[](Pickup* p) { return p && !p->Collected; });
 
@@ -403,7 +394,6 @@ void Game::Update(float dt)
 	}
 
 
-	// --- 4. RUCH WROGÓW I KOLIZJE MIÊDZY NIMI ---
 	for (Enemy* enemy : Enemies)
 	{
 		enemy->Update(Window, dt);
@@ -432,7 +422,6 @@ void Game::Update(float dt)
 		}
 	}
 
-	// --- 5. KOLIZJE GRACZ vs WROGOWIE ---
 	for (Enemy* enemy : Enemies)
 	{
 		glm::vec2 direction = MainPlayer->Position - enemy->Position;
@@ -441,13 +430,11 @@ void Game::Update(float dt)
 
 		if (dist < hitRadius && dist > 0.001f)
 		{
-			// FIZYKA
 			float overlap = hitRadius - dist;
 			glm::vec2 pushDir = glm::normalize(direction);
 			float pushForce = 5.0f;
 			MainPlayer->Position += pushDir * overlap * pushForce;
 
-			// WALKA
 			if (PlayerHitTimer <= 0.0f)
 			{
 				MainPlayer->HP -= 1;
@@ -470,7 +457,6 @@ void Game::Update(float dt)
 
 		p->Update(Window, dt);
 
-		//kolizja pocisk -> wróg
 		for (Enemy* e : Enemies)
 		{
 			if (!e) continue;
